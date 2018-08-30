@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="zh-CN">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
-    <title>Grid Load Time Test</title>
+    <title>Nested Json Data Grid</title>
     <!-- grid.simple.min.css, grid.simple.min.js -->
     <link rel="stylesheet" href="../../builds/merged/bsgrid.all.min.css"/>
     <script type="text/javascript" src="../../plugins/jquery-1.4.4.min.js"></script>
@@ -11,13 +11,12 @@
     <script type="text/javascript" src="../../builds/merged/bsgrid.all.min.js"></script>
 </head>
 <body style="background-color: #fff;">
-<div id="load_time"></div>
 <table id="searchTable">
     <tr>
-        <th w_index="XH" w_sort="XH,desc" width="5%;">XH</th>
-        <th w_index="ID" w_sort="ID" width="5%;">ID</th>
+        <th w_index="XH" width="5%;">XH</th>
+        <th w_index="ID" width="5%;">ID</th>
         <th w_index="CHAR" w_align="left" width="15%;">CHAR</th>
-        <th w_index="TEXT" w_align="left" width="30%;">TEXT</th>
+        <th w_render="jsonText" w_align="left" width="30%;">TEXT</th>
         <th w_index="DATE" width="15%;">DATE</th>
         <th w_index="TIME" width="15%;">TIME</th>
         <th w_index="NUM" width="5%;">NUM</th>
@@ -25,28 +24,27 @@
     </tr>
 </table>
 <script type="text/javascript">
-    var date;
-    // extend before render grid methods
-    $.bsgrid.forcePushPropertyInObject($.fn.bsgrid.defaults.extend.beforeRenderGridMethods, 'extend_before_render_grid', function (parseSuccess, gridData, options) {
-        date = new Date();
-    });
-    // extend after render grid methods
-    $.bsgrid.forcePushPropertyInObject($.fn.bsgrid.defaults.extend.afterRenderGridMethods, 'extend_after_render_grid', function (parseSuccess, gridData, options) {
-        $('#load_time').html('Load data number: ' + options.curPageRowsNum + ', load time=' + (new Date().getTime() - date.getTime()) + 'ms');
-    });
-
     var gridObj;
     $(function () {
         gridObj = $.fn.bsgrid.init('searchTable', {
-            url: 'data/json.jsp?load_time_test=true',
+            dataTrim: false, // if trim render cell value, default true
+            url: 'data/nested.json',
             // autoLoad: false,
             pageSizeSelect: true,
-            pageSize: 1000
+            pageSize: 10
         });
     });
 
     function operate(record, rowIndex, colIndex, options) {
         return '<a href="#" onclick="alert(\'ID=' + gridObj.getRecordIndexValue(record, 'ID') + '\');">Operate</a>';
+    }
+
+    function jsonText(record, rowIndex, colIndex, options) {
+        var text = gridObj.getRecordIndexValue(record, 'TEXT');
+        if (text != null) {
+            return $.trim(text['TITLE']);
+        }
+        return '';
     }
 </script>
 </body>
